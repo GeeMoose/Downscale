@@ -1,0 +1,4 @@
+discord.py==1.7.3
+numpy
+opencv_python_headless
+PyYAML==6.0

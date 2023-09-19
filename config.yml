@@ -1,0 +1,5 @@
+bot_token: 'MTE0NzEwODI0NDgyNTg1NDAxMw.GrQ8a1.UnK3NkCJjLKkoxS0cSgnbddG81R2l0Pf3WLq8s'
+bot_prefix: '/downto'
+img_size_cutoff: 25000000
+moderator_role_id: 1147108244825854013
+global_guild_block: false
