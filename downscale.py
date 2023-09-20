@@ -3,14 +3,12 @@ import numpy as np
 import os 
 import re
 import cv2
-import urllib
+import urllib.request
 
 import discord
 import yaml
 from discord.ext import commands
 from discord_slash import SlashCommand
-
-import helpers
 
 description = """downscale bot entirely in python"""
 
@@ -34,6 +32,7 @@ def download_img_from_url(imageurl):
             },
         )
     url = urllib.request.urlopen(req)
+    # 读取url in-memory方式
     image = np.asarray(bytearray(url.read()), dtype="uint8")
     image = cv2.imdecode(image, cv2.IMREAD_UNCHANGED)
     return image
@@ -42,7 +41,7 @@ class Processor(commands.Cog):
     def __init__(self,bot):
         self.bot = bot
     
-    def downscale_method(img,scale):
+    def downscale_method(image,scale):
         # 缩放计算
         '''
         formula: w * (1/x * 100) / 100
@@ -69,46 +68,51 @@ class Processor(commands.Cog):
 
 `/image [url] --{0} [scaleFactor]` Downscale your image to scale what you want   
 
-Example: `/image www.imageurl.com/image.png --downto 4x`""".format(
+Example: `/image www.imageurl.com/image.png --{0} 4x`""".format(
                 bot.command_prefix
             )
         )
     
-    @slash.slash
+    @slash.slash(name="image",description="downscale image with scale")
     async def downscale(ctx, input):
         '''
         downscale：downscale image to lower status for the goal that user use it
         '''
         imageurl = ""
         scale = 0
-        result = "result.jpg"
+        # result = "result.jpg"
         data = re.split(r'(?:,|;|\s)\s*', input)
-        if len(data)!=2:
+        if len(data)!=3:
             await ctx.send("输入姿势有错误，请检查后，再试一次！")
             return 
         if re.match(r'^(?:http|ftp)s?://', data[0]) is not None:
             imageurl = data[0]
-        if int(data[2]) > 0:
-            scale = int(data[2])
+        if int(data[2][:-1]) > 0:
+            scale = int(data[2][:-1])
         if imageurl == "" or scale == 0:
             await ctx.send("输入姿势有错误，请检查后，再试一次！")
             return 
         
+        # 注册文件名
+        filename = imageurl[imageurl.rfind("/") + 1:]
+        
+        await ctx.send("发现图片中......")
+        # 下载图片
         image = download_img_from_url(imageurl)
-        filename = image[image.rfind("/") + 1:]
+        
         
         await ctx.send("降分中.......")
         # 缩放图片到一定比例
-        image = Processor.downscale_img(image, scale)
+        image = Processor.downscale_method(image, scale)
         
         data = BytesIO(
             cv2.imencode(".png", image, [cv2.IMWRITE_PNG_COMPRESSION, 16])[
-                1].tostring()
+                1].tobytes()
         )
         
-        await ctx.send("图片成功降分到{}".format(scale),file= discord.File(data, "{}.png".format(filename.split(".")[0])))
+        await ctx.send("图片成功降分了{}倍".format(scale),file= discord.File(data, "{}.png".format(filename.split(".")[0])))
         
 
 bot.add_cog(Processor(bot))
 
-bot.run(config['bot_token'])
+bot.run(config["bot_token"])
