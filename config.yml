@@ -1,4 +1,4 @@
-bot_token: 'MTE1MzgxNzczMjkyMDM4MTQ3MA.GPtMbF.sEBpXAWuobmzwusPe9uQt-UjMNFjQn5_rusej0'
+bot_token: 'your_bot_token'
 bot_prefix: 'downto'
 img_size_cutoff: 25000000
 moderator_role_id: 1147108244825854013
